@@ -1,0 +1,38 @@
+.tabla-periodica {
+    display: grid;
+    grid-template-columns: repeat(18, 1fr);
+    gap: 4px;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.elemento.vacio {
+    visibility: hidden;
+}
+
+/* Añadir más estilos específicos para diferentes tipos de elementos */
+.elemento.metal-alkalino { background-color: #ffeb3b; }
+.elemento.metal-transition { background-color: #ff9800; }
+.elemento.metal-post-transition { background-color: #8bc34a; }
+.elemento.lanthanide { background-color: #9c27b0; }
+.elemento.actinide { background-color: #673ab7; }
+
+/* Mejorar la visualización en dispositivos móviles */
+@media (max-width: 1200px) {
+    .elemento {
+        font-size: 0.8em;
+    }
+    .elemento .peso {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .tabla-periodica {
+        grid-template-columns: repeat(9, 1fr);
+    }
+    .elemento .nombre {
+        display: none;
+    }
+}

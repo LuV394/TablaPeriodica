@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla Periódica Interactiva</title>
+    <style>
+        :root {
+            --metal-color: #ffd700;
+            --no-metal-color: #90ee90;
+            --gas-noble-color: #87ceeb;
+            --metal-transition-color: turquoise;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .nav-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .nav-button:hover {
+            background-color: #45a049;
+        }
+
+        .tabla-periodica {
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            gap: 2px;
+            margin-bottom: 30px;
+        }
+
+        .elemento {
+            background-color: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .elemento:hover {
+            transform: scale(1.1);
+            z-index: 1;
+        }
+
+        .elemento.metal { background-color: var(--metal-color); }
+        .elemento.no-metal { background-color: var(--no-metal-color); }
+        .elemento.gas-noble { background-color: var(--gas-noble-color); }
+        .elemento.metal-transition { background-color: var(--metal-transition-color); }
+
+        .numero {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .simbolo {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .nombre {
+            font-size: 0.7em;
+        }
+
+        .peso {
+            font-size: 0.7em;
+            color: #444;
+        }
+
+        .reacciones-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .reaccion-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .reaccion-form select,
+        .reaccion-form input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .reaccion-form button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .resultado {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        @media (max-width: 1200px) {
+            .tabla-periodica {
+                grid-template-columns: repeat(9, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tabla-periodica {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Tabla Periódica Interactiva</h1>
+            <p>Explora los elementos y sus reacciones químicas</p>
+        </div>
+
+        <div class="nav-menu">
+            <button class="nav-button" onclick="mostrarTabla()">Ver Tabla Periódica</button>
+            <button class="nav-button" onclick="mostrarReacciones()">Reacciones Químicas</button>
+        </div>
+
+        <div id="tabla-container" class="tabla-periodica">
+            <!-- Los elementos se generarán dinámicamente con JavaScript -->
+        </div>
+
+        <div id="reacciones-container" class="reacciones-panel" style="display: none;">
+            <h2>Reacciones Químicas</h2>
+            <div class="reaccion-form">
+                <select id="tipo-reaccion">
+                    <option value="">Seleccione tipo de reacción</option>
+                    <option value="oxido-metalico">Óxidos metálicos</option>
+                    <option value="oxido-no-metalico">Óxidos no metálicos</option>
+                    <option value="hidruro-metalico">Hidruros metálicos</option>
+                    <option value="hidracido">Hidrácidos</option>
+                    <option value="hidroxido">Hidróxidos</option>
+                </select>
+                <input type="text" id="elemento-input" placeholder="Ingrese símbolo del elemento">
+                <button onclick="calcularReaccion()">Calcular Reacción</button>
+            </div>
+            <div id="resultado" class="resultado"></div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de los elementos (se pueden cargar desde una API o base de datos)
+        const elementos = [
+    // Fila 1
+    { numero: 1, simbolo: "H", nombre: "Hidrógeno", peso: 1.008, tipo: "No metal" },
+    { numero: 2, simbolo: "He", nombre: "Helio", peso: 4.0026, tipo: "Gas noble" },
+    
+    // Fila 2
+    { numero: 3, simbolo: "Li", nombre: "Litio", peso: 6.94, tipo: "Metal alcalino" },
+    { numero: 4, simbolo: "Be", nombre: "Berilio", peso: 9.0122, tipo: "Metal alcalinotérreo" },
+    { numero: 5, simbolo: "B", nombre: "Boro", peso: 10.81, tipo: "Metaloide" },
+    { numero: 6, simbolo: "C", nombre: "Carbono", peso: 12.011, tipo: "No metal" },
+    { numero: 7, simbolo: "N", nombre: "Nitrógeno", peso: 14.007, tipo: "No metal" },
+    { numero: 8, simbolo: "O", nombre: "Oxígeno", peso: 15.999, tipo: "No metal" },
+    { numero: 9, simbolo: "F", nombre: "Flúor", peso: 18.998, tipo: "No metal" },
+    { numero: 10, simbolo: "Ne", nombre: "Neón", peso: 20.18, tipo: "Gas noble" },
+
+    // Fila 3
+    { numero: 11, simbolo: "Na", nombre: "Sodio", peso: 22.99, tipo: "Metal alcalino" },
+    { numero: 12, simbolo: "Mg", nombre: "Magnesio", peso: 24.305, tipo: "Metal alcalinotérreo" },
+    { numero: 13, simbolo: "Al", nombre: "Aluminio", peso: 26.982, tipo: "Metal" },
+    { numero: 14, simbolo: "Si", nombre: "Silicio", peso: 28.085, tipo: "Metaloide" },
+    { numero: 15, simbolo: "P", nombre: "Fósforo", peso: 30.974, tipo: "No metal" },
+    { numero: 16, simbolo: "S", nombre: "Azufre", peso: 32.06, tipo: "No metal" },
+    { numero: 17, simbolo: "Cl", nombre: "Cloro", peso: 35.45, tipo: "No metal" },
+    { numero: 18, simbolo: "Ar", nombre: "Argón", peso: 39.948, tipo: "Gas noble" },
+
+    // Fila 4
+    { numero: 19, simbolo: "K", nombre: "Potasio", peso: 39.098, tipo: "Metal alcalino" },
+    { numero: 20, simbolo: "Ca", nombre: "Calcio", peso: 40.078, tipo: "Metal alcalinotérreo" },
+    { numero: 21, simbolo: "Sc", nombre: "Escandio", peso: 44.956, tipo: "Metal de transición" },
+    { numero: 22, simbolo: "Ti", nombre: "Titanio", peso: 47.867, tipo: "Metal de transición" },
+    { numero: 23, simbolo: "V", nombre: "Vanadio", peso: 50.942, tipo: "Metal de transición" },
+    { numero: 24, simbolo: "Cr", nombre: "Cromo", peso: 51.996, tipo: "Metal de transición" },
+    { numero: 25, simbolo: "Mn", nombre: "Manganeso", peso: 54.938, tipo: "Metal de transición" },
+    { numero: 26, simbolo: "Fe", nombre: "Hierro", peso: 55.845, tipo: "Metal de transición" },
+    { numero: 27, simbolo: "Co", nombre: "Cobalto", peso: 58.933, tipo: "Metal de transición" },
+    { numero: 28, simbolo: "Ni", nombre: "Níquel", peso: 58.693, tipo: "Metal de transición" },
+    { numero: 29, simbolo: "Cu", nombre: "Cobre", peso: 63.546, tipo: "Metal de transición" },
+    { numero: 30, simbolo: "Zn", nombre: "Zinc", peso: 65.38, tipo: "Metal de transición" },
+    { numero: 31, simbolo: "Ga", nombre: "Galio", peso: 69.723, tipo: "Metal" },
+    { numero: 32, simbolo: "Ge", nombre: "Germanio", peso: 72.63, tipo: "Metaloide" },
+    { numero: 33, simbolo: "As", nombre: "Arsénico", peso: 74.922, tipo: "Metaloide" },
+    { numero: 34, simbolo: "Se", nombre: "Selenio", peso: 78.971, tipo: "No metal" },
+    { numero: 35, simbolo: "Br", nombre: "Bromo", peso: 79.904, tipo: "No metal" },
+    { numero: 36, simbolo: "Kr", nombre: "Kriptón", peso: 83.798, tipo: "Gas noble" },
+
+    // Fila 5
+    { numero: 37, simbolo: "Rb", nombre: "Rubidio", peso: 85.468, tipo: "Metal alcalino" },
+    { numero: 38, simbolo: "Sr", nombre: "Estroncio", peso: 87.62, tipo: "Metal alcalinotérreo" },
+    { numero: 39, simbolo: "Y", nombre: "Itrio", peso: 88.906, tipo: "Metal de transición" },
+    { numero: 40, simbolo: "Zr", nombre: "Circonio", peso: 91.224, tipo: "Metal de transición" },
+    { numero: 41, simbolo: "Nb", nombre: "Niobio", peso: 92.906, tipo: "Metal de transición" },
+    { numero: 42, simbolo: "Mo", nombre: "Molibdeno", peso: 95.95, tipo: "Metal de transición" },
+    { numero: 43, simbolo: "Tc", nombre: "Tecnecio", peso: 98, tipo: "Metal de transición" },
+    { numero: 44, simbolo: "Ru", nombre: "Rutenio", peso: 101.07, tipo: "Metal de transición" },
+    { numero: 45, simbolo: "Rh", nombre: "Rodio", peso: 102.91, tipo: "Metal de transición" },
+    { numero: 46, simbolo: "Pd", nombre: "Paladio", peso: 106.42, tipo: "Metal de transición" },
+    { numero: 47, simbolo: "Ag", nombre: "Plata", peso: 107.87, tipo: "Metal de transición" },
+    { numero: 48, simbolo: "Cd", nombre: "Cadmio", peso: 112.41, tipo: "Metal de transición" },
+    { numero: 49, simbolo: "In", nombre: "Indio", peso: 114.82, tipo: "Metal" },
+    { numero: 50, simbolo: "Sn", nombre: "Estaño", peso: 118.71, tipo: "Metal" },
+    { numero: 51, simbolo: "Sb", nombre: "Antimonio", peso: 121.76, tipo: "Metaloide" },
+    { numero: 52, simbolo: "Te", nombre: "Telurio", peso: 127.60, tipo: "Metaloide" },
+    { numero: 53, simbolo: "I", nombre: "Yodo", peso: 126.90, tipo: "No metal" },
+    { numero: 54, simbolo: "Xe", nombre: "Xenón", peso: 131.29, tipo: "Gas noble" },
+
+    // Fila 6
+    { numero: 55, simbolo: "Cs", nombre: "Cesio", peso: 132.91, tipo: "Metal alcalino" },
+    { numero: 56, simbolo: "Ba", nombre: "Bario", peso: 137.33, tipo: "Metal alcalinotérreo" },
+    { numero: 57, simbolo: "La", nombre: "Lantano", peso: 138.91, tipo: "Lantánido" },
+    { numero: 58, simbolo: "Ce", nombre: "Cerio", peso: 140.12, tipo: "Lantánido" },
+    { numero: 59, simbolo: "Pr", nombre: "Praseodimio", peso: 140.91, tipo: "Lantánido" },
+    { numero: 60, simbolo: "Nd", nombre: "Neodimio", peso: 144.24, tipo: "Lantánido" },
+    { numero: 61, simbolo: "Pm", nombre: "Prometio", peso: 145, tipo: "Lantánido" },
+    { numero: 62, simbolo: "Sm", nombre: "Samario", peso: 150.36, tipo: "Lantánido" },
+    { numero: 63, simbolo: "Eu", nombre: "Europio", peso: 151.96, tipo: "Lantánido" },
+    { numero: 64, simbolo: "Gd", nombre: "Gadolinio", peso: 157.25, tipo: "Lantánido" },
+    { numero: 65, simbolo: "Tb", nombre: "Terbio", peso: 158.93, tipo: "Lantánido" },
+    { numero: 66, simbolo: "Dy", nombre: "Disprosio", peso: 162.50, tipo: "Lantánido" },
+    { numero: 67, simbolo: "Ho", nombre: "Holmio", peso: 164.93, tipo: "Lantánido" },
+    { numero: 68, simbolo: "Er", nombre: "Erbio", peso: 167.26, tipo: "Lantánido" },
+    { numero: 69, simbolo: "Tm", nombre: "Tulio", peso: 168.93, tipo: "Lantánido" },
+    { numero: 70, simbolo: "Yb", nombre: "Iterbio", peso: 173.04, tipo: "Lantánido" },
+    { numero: 71, simbolo: "Lu", nombre: "Lutecio", peso: 174.97, tipo: "Lantánido" },
+
+    // Fila 7
+    { numero: 72, simbolo: "Hf", nombre: "Hafnio", peso: 178.49, tipo: "Metal de transición" },
+    { numero: 73, simbolo: "Ta", nombre: "Tantalio", peso: 180.95, tipo: "Metal de transición" },
+    { numero: 74, simbolo: "W", nombre: "Wolframio", peso: 183.84, tipo: "Metal de transición" },
+    { numero: 75, simbolo: "Re", nombre: "Renio", peso: 186.21, tipo: "Metal de transición" },
+    { numero: 76, simbolo: "Os", nombre: "Osmio", peso: 190.23, tipo: "Metal de transición" },
+    { numero: 77, simbolo: "Ir", nombre: "Iridio", peso: 192.22, tipo: "Metal de transición" },
+    { numero: 78, simbolo: "Pt", nombre: "Platino", peso: 195.08, tipo: "Metal de transición" },
+    { numero: 79, simbolo: "Au", nombre: "Oro", peso: 196.97, tipo: "Metal de transición" },
+    { numero: 80, simbolo: "Hg", nombre: "Mercurio", peso: 200.59, tipo: "Metal de transición" },
+    { numero: 81, simbolo: "Tl", nombre: "Talio", peso: 204.38, tipo: "Metal" },
+    { numero: 82, simbolo: "Pb", nombre: "Plomo", peso: 207.2, tipo: "Metal" },
+    { numero: 83, simbolo: "Bi", nombre: "Bismuto", peso: 208.98, tipo: "Metal" },
+    { numero: 84, simbolo: "Po", nombre: "Polonio", peso: 209, tipo: "Metaloide" },
+    { numero: 85, simbolo: "At", nombre: "Astato", peso: 210, tipo: "Metaloide" },
+    { numero: 86, simbolo: "Rn", nombre: "Radón", peso: 222, tipo: "Gas noble" },
+
+       // Actínidos
+       { numero: 87, simbolo: "Fr", nombre: "Francio", peso: 223, tipo: "Metal alcalino" },
+    { numero: 88, simbolo: "Ra", nombre: "Radio", peso: 226, tipo: "Metal alcalinotérreo" },
+    { numero: 89, simbolo: "Ac", nombre: "Actinio", peso: 227, tipo: "Actínido" },
+    { numero: 90, simbolo: "Th", nombre: "Torio", peso: 232.04, tipo: "Actínido" },
+    { numero: 91, simbolo: "Pa", nombre: "Protactinio", peso: 231.04, tipo: "Actínido" },
+    { numero: 92, simbolo: "U", nombre: "Uranio", peso: 238.03, tipo: "Actínido" },
+    { numero: 93, simbolo: "Np", nombre: "Neptunio", peso: 237, tipo: "Actínido" },
+    { numero: 94, simbolo: "Pu", nombre: "Plutonio", peso: 244, tipo: "Actínido" },
+    { numero: 95, simbolo: "Am", nombre: "Americio", peso: 243, tipo: "Actínido" },
+    { numero: 96, simbolo: "Cm", nombre: "Curio", peso: 247, tipo: "Actínido" },
+    { numero: 97, simbolo: "Bk", nombre: "Berkelio", peso: 247, tipo: "Actínido" },
+    { numero: 98, simbolo: "Cf", nombre: "Californio", peso: 251, tipo: "Actínido" },
+    { numero: 99, simbolo: "Es", nombre: "Einstenio", peso: 252, tipo: "Actínido" },
+    { numero: 100, simbolo: "Fm", nombre: "Fermio", peso: 257, tipo: "Actínido" },
+    { numero: 101, simbolo: "Md", nombre: "Mendelevio", peso: 258, tipo: "Actínido" },
+    { numero: 102, simbolo: "No", nombre: "Nobelio", peso: 259, tipo: "Actínido" },
+    { numero: 103, simbolo: "Lr", nombre: "Lawrencio", peso: 266, tipo: "Actínido" },
+
+    // Metales de transición adicionales
+    { numero: 104, simbolo: "Rf", nombre: "Rutherfordio", peso: 267, tipo: "Metal de transición" },
+    { numero: 105, simbolo: "Db", nombre: "Dubnio", peso: 270, tipo: "Metal de transición" },
+    { numero: 106, simbolo: "Sg", nombre: "Seaborgio", peso: 271, tipo: "Metal de transición" },
+    { numero: 107, simbolo: "Bh", nombre: "Bohrio", peso: 270, tipo: "Metal de transición" },
+    { numero: 108, simbolo: "Hs", nombre: "Hassio", peso: 277, tipo: "Metal de transición" },
+    { numero: 109, simbolo: "Mt", nombre: "Meitnerio", peso: 278, tipo: "Metal de transición" },
+    { numero: 110, simbolo: "Ds", nombre: "Darmstatio", peso: 281, tipo: "Metal de transición" },
+    { numero: 111, simbolo: "Rg", nombre: "Roentgenio", peso: 282, tipo: "Metal de transición" },
+    { numero: 112, simbolo: "Cn", nombre: "Copernicio", peso: 285, tipo: "Metal de transición" },
+
+    // Otros elementos
+    { numero: 113, simbolo: "Nh", nombre: "Nihonio", peso: 286, tipo: "Desconocido" },
+    { numero: 114, simbolo: "Fl", nombre: "Flerovio", peso: 289, tipo: "Desconocido" },
+    { numero: 115, simbolo: "Mc", nombre: "Moscovio", peso: 290, tipo: "Desconocido" },
+    { numero: 116, simbolo: "Lv", nombre: "Livermorio", peso: 293, tipo: "Desconocido" },
+    { numero: 117, simbolo: "Ts", nombre: "Tenesino", peso: 294, tipo: "Desconocido" },
+    { numero: 118, simbolo: "Og", nombre: "Oganesón", peso: 294, tipo: "Gas noble" }
+
+        ];
+
+        function mostrarTabla() {
+            console.log("Mostrando la tabla periódica");
+            const tablaContainer = document.getElementById('tabla-container');
+            tablaContainer.style.display = 'grid';
+            document.getElementById('reacciones-container').style.display = 'none';
+            tablaContainer.innerHTML = ''; // Limpia contenido previo
+
+            elementos.forEach(elemento => {
+                const elementoDiv = document.createElement('div');
+                elementoDiv.className = `elemento ${getTipoClass(elemento.tipo)}`;
+                elementoDiv.innerHTML = `
+                    <div class="numero">${elemento.numero}</div>
+                    <div class="simbolo">${elemento.simbolo}</div>
+                    <div class="nombre">${elemento.nombre}</div>
+                    <div class="peso">${elemento.peso}</div>
+                `;
+                tablaContainer.appendChild(elementoDiv);
+            });
+        }
+
+        function mostrarReacciones() {
+            console.log("Mostrando reacciones químicas");
+            document.getElementById('tabla-container').style.display = 'none';
+            document.getElementById('reacciones-container').style.display = 'block';
+        }
+
+        function getTipoClass(tipo) {
+            switch (tipo) {
+                case "No metal": return "no-metal";
+                case "Gas noble": return "gas-noble";
+                case "Metal de transición": return "metal-transition";
+                case "Metal alcalino": return "metal";
+                default: return "";
+            }
+        }
+
+        function calcularReaccion() {
+            const tipoReaccion = document.getElementById('tipo-reaccion').value;
+            const elemento = document.getElementById('elemento-input').value.trim();
+            let resultado = "";
+
+            if (!tipoReaccion || !elemento) {
+                resultado = "Seleccione un tipo de reacción y un elemento válido.";
+            } else {
+                switch (tipoReaccion) {
+                    case "oxido-metalico":
+                        resultado = `4${elemento} + 3O₂ → 2${elemento}₂O₃`;
+                        break;
+                    case "oxido-no-metalico":
+                        resultado = `${elemento} + O₂ → ${elemento}O`;
+                        break;
+                    case "hidruro-metalico":
+                        resultado = `${elemento} + H₂ → ${elemento}H₂`;
+                        break;
+                    case "hidracido":
+                        resultado = `${elemento} + H₂ → H${elemento}`;
+                        break;
+                    case "hidroxido":
+                        resultado = `${elemento} + H₂O → ${elemento}(OH)`;
+                        break;
+                    default:
+                        resultado = "Reacción desconocida.";
+                }
+            }
+
+            document.getElementById('resultado').innerHTML = resultado;
+        }
+
+        window.onload = mostrarTabla;
+    </script>
+</body>
+</html>
