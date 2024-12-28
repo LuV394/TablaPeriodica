@@ -45,7 +45,8 @@ public class ReaccionQuimica {
         // Lógica para determinar el producto basado en los reactivos
     }
 }
-3. Controlador de la Aplicación
+
+##3. Controlador de la Aplicación
 El controlador TablaPeriodicaController gestiona las solicitudes y respuestas en la aplicación utilizando Spring.
 
 java
