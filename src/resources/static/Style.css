@@ -36,3 +36,24 @@
         display: none;
     }
 }
+
+.reaccion-form input[type="number"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.reaccion-form button {
+    margin-top: 10px;
+    width: 100%;
+}
+
+.reaccion-form button:last-child {
+    background-color: #2196F3;
+}
+
+.reaccion-form button:last-child:hover {
+    background-color: #1976D2;
+}
