@@ -18,7 +18,8 @@ La interfaz de usuario se implementa utilizando HTML y CSS. La Tabla Periódica 
     <p>H</p>
     <p>1.008</p>
 </div>
-2. Manejo de Reacciones Químicas en Java
+
+##2. Manejo de Reacciones Químicas en Java
 Java gestiona la lógica de la aplicación, permitiendo a los usuarios realizar interacciones sobre diferentes tipos de reacciones químicas.
 
 java
